@@ -1,35 +1,25 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
-
-	"golang.ngrok.com/ngrok"
-	"golang.ngrok.com/ngrok/config"
 )
 
 func main() {
-	if err := run(context.Background()); err != nil {
-		log.Fatal(err)
-	}
-}
+	port := "8080" // Можно сменить порт, если нужно
+	fmt.Println("Сервер запущен на http://localhost:" + port)
 
-func run(ctx context.Context) error {
-	listener, err := ngrok.Listen(ctx,
-		config.HTTPEndpoint(),
-		ngrok.WithAuthtokenFromEnv(),
-	)
+	http.HandleFunc("/", handler)
+
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
-		return err
+		log.Fatal("Ошибка запуска сервера:", err)
 	}
-
-	log.Println("Ingress established at:", listener.URL())
-
-	return http.Serve(listener, http.HandlerFunc(handler))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello from ngrok-go!")
+	fmt.Println("Обработан запрос:", r.Method, r.URL.Path)
+	fmt.Fprintln(w, "Hello from Go server!")
 }
+
